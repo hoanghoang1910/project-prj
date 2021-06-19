@@ -36,6 +36,7 @@ public class ProductServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         try {
+            jdshjvbhjsbdvhbfhv
                int count = new ProductDao().count();
             int endPage = count/8;
             if(count % 8 != 0){
