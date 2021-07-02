@@ -83,7 +83,7 @@ public class AdminCRUDServlet extends HttpServlet {
         int categoryID = Integer.parseInt(request.getParameter("CategoryID"));
         double price = Double.parseDouble(request.getParameter("Price"));
         int quantity = Integer.parseInt(request.getParameter("Quantity"));
-        String img_link = request.getParameter("Img_link");
+        String imgLink = request.getParameter("Img_link");
         String description = request.getParameter("Description");
         String note = request.getParameter("Note");
         int status = Integer.parseInt(request.getParameter("Status"));
@@ -94,7 +94,7 @@ public class AdminCRUDServlet extends HttpServlet {
                         .name(name)
                         .price(price)
                         .quantity(quantity)
-                        .imgName(img_link)
+                        .imgName(imgLink)
                         .description(description)
                         .note(note)
                         .status(status)
