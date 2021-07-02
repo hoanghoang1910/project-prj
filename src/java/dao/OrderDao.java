@@ -12,11 +12,11 @@ import jdbc.SQLServerConnection;
 
 public class OrderDao {
 
-    public int add(Order order) {
+    public int add(Order order) throws SQLException {
 
         String query = "Insert into orders (name,mobile,address,totalPrice,note,status,orders.order_date) values (?, ?, ?, ?, ?, ?,GETDATE())";
         int check = 0;
-
+        ResultSet rs = null;
         try (Connection con = SQLServerConnection.getConnection();
                 PreparedStatement ps = con.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             ps.setObject(1, order.getName());
@@ -28,23 +28,26 @@ public class OrderDao {
 
             check = ps.executeUpdate();
             if (check > 0) {
-                ResultSet rs = ps.getGeneratedKeys();
+                rs = ps.getGeneratedKeys();
                 rs.next();
                 return rs.getInt(1);
             }
-
+            
         } catch (SQLException ex) {
             ex.printStackTrace(System.out);
+        }finally{
+            rs.close();
         }
         return 0;
     }
 
-    public List<Order> getOrder() {
+    public List<Order> getOrder() throws SQLException {
         List<Order> list = new ArrayList<>();
         String query = "SELECT * FROM orders";
+        ResultSet rs = null;
         try (Connection con = SQLServerConnection.getConnection();
                 PreparedStatement ps = con.prepareStatement(query)) {
-            ResultSet rs = ps.executeQuery();
+            rs = ps.executeQuery();
             while (rs.next()) {
                 Order a = Order.builder().
                         id(rs.getInt(1))
@@ -57,21 +60,25 @@ public class OrderDao {
                         .build();
                 list.add(a);
             }
+            
             return list;
         } catch (SQLException ex) {
             ex.printStackTrace(System.out);
+        }finally{
+            rs.close();
         }
         return null;
     }
 
-    public Order getOrderbyID(int id) {
+    public Order getOrderbyID(int id) throws SQLException {
         String query = "SELECT * FROM orders where id = ?";
+        ResultSet rs = null;
         try (Connection con = SQLServerConnection.getConnection();
                 PreparedStatement ps = con.prepareStatement(query)) {
             ps.setInt(1, id);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                Order a = Order.builder().
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                return Order.builder().
                         id(rs.getInt(1))
                         .name(rs.getString(2))
                         .mobile(rs.getString(3))
@@ -80,10 +87,12 @@ public class OrderDao {
                         .note(rs.getString(6))
                         .status(rs.getInt(7))
                         .build();
-                return a;
             }
+            
         } catch (SQLException ex) {
             ex.printStackTrace(System.out);
+        }finally{
+            rs.close();
         }
         return null;
     }
@@ -106,7 +115,7 @@ public class OrderDao {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws SQLException {
         OrderDao a = new OrderDao();
         Order b = a.getOrderbyID(10);
         a.updateOrder(b,10);

@@ -33,22 +33,21 @@ public class Product {
     private String note;
     private int status; 
 
- public String getOne() {
+ public String getOne() throws SQLException {
         int id = this.categoryId;
         String query = "SELECT * FROM categories WHERE id = ?";
-        
+        ResultSet rs = null;
         try (Connection con = SQLServerConnection.getConnection();
                 PreparedStatement ps = con.prepareStatement(query)) {
             ps.setInt(1, id);
             
-            ResultSet rs = ps.executeQuery();
+            rs = ps.executeQuery();
             if (rs.next()) {
-                String name = rs.getString(2);
-                return name;
+                return rs.getString(2);
             }
         } catch (SQLException ex) {
             ex.printStackTrace(System.out);
-        }
+        }finally{rs.close();}
         return null;
     }
        

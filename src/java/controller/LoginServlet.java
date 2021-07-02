@@ -15,7 +15,10 @@ import entity.Category;
 import entity.Product;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.SQLException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -78,10 +81,16 @@ public class LoginServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         PrintWriter out = response.getWriter();
+        try{
         String account = request.getParameter("username");
         String password = request.getParameter("password");
         AccountDao a = new AccountDao();
-        Account user = a.login(account, password);
+        Account user = null;
+        try {
+            user = a.login(account, password);
+        } catch (SQLException ex) {
+            Logger.getLogger(LoginServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
         if (user != null) {
             if ("admin".equals(user.getRoll())) {
                 List<Brand> lsBrand = new BrandDao().getAll();
@@ -99,6 +108,8 @@ public class LoginServlet extends HttpServlet {
         } else {
             out.print("Login failed");
         }
+        
+        }catch(IOException | ServletException e){System.out.println("error");}finally{out.close();}
     }
 
     /**

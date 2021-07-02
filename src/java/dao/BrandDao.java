@@ -12,6 +12,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import jdbc.SQLServerConnection;
 
 
@@ -22,11 +24,11 @@ public class BrandDao implements IMethod<Brand> {
 
         String query = "SELECT * FROM brands";
         List<Brand> ls = new ArrayList<>();
-
+        ResultSet rs = null;
         try (Connection con = SQLServerConnection.getConnection();
                 PreparedStatement ps = con.prepareStatement(query)) {
 
-            ResultSet rs = ps.executeQuery();
+            rs = ps.executeQuery();
             while (rs.next()) {
                 Brand brand = Brand.builder()
                         .id(rs.getInt(1))
@@ -35,10 +37,18 @@ public class BrandDao implements IMethod<Brand> {
                         .build();
                 ls.add(brand);
             }
+            
             return ls;
         } catch (SQLException ex) {
             ex.printStackTrace(System.out);
-        }
+        }finally{
+            try 
+            {
+            rs.close();
+            } catch (SQLException ex) {
+                Logger.getLogger(BrandDao.class.getName()).log(Level.SEVERE, null, ex);
+            }
+}
         return null;
     }
 
@@ -46,22 +56,29 @@ public class BrandDao implements IMethod<Brand> {
     public Brand getOne(int id) {
 
         String query = "SELECT * FROM brands WHERE id = ?";
-
+        ResultSet rs = null;
         try (Connection con = SQLServerConnection.getConnection();
                 PreparedStatement ps = con.prepareStatement(query)) {
             ps.setInt(1, id);
 
-            ResultSet rs = ps.executeQuery();
+            rs = ps.executeQuery();
             if (rs.next()) {
-                Brand brand = Brand.builder()
+                return Brand.builder()
                         .id(rs.getInt(1))
                         .name(rs.getString(2))
                         .status(rs.getInt(3))
                         .build();
-                return brand;
             }
+            rs.close();
         } catch (SQLException ex) {
             ex.printStackTrace(System.out);
+        }
+        finally{
+            try {
+                rs.close();
+            } catch (SQLException ex) {
+                Logger.getLogger(BrandDao.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
         return null;
     }

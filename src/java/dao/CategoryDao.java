@@ -12,6 +12,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import jdbc.SQLServerConnection;
 
 public class CategoryDao implements IMethod<Category> {
@@ -21,11 +23,11 @@ public class CategoryDao implements IMethod<Category> {
         
         String query = "SELECT * FROM categories";
         List<Category> ls = new ArrayList<>();
-        
+        ResultSet rs = null;
         try (Connection con = SQLServerConnection.getConnection();
                 PreparedStatement ps = con.prepareStatement(query)) {
             
-            ResultSet rs = ps.executeQuery();
+            rs = ps.executeQuery();
             while (rs.next()) {
                 Category category = Category.builder()
                         .id(rs.getInt(1))
@@ -34,10 +36,16 @@ public class CategoryDao implements IMethod<Category> {
                         .build();
                 ls.add(category);
             }
+            
             return ls;
         } catch (SQLException ex) {
             ex.printStackTrace(System.out);
-        }
+        }finally{try {
+            rs.close();
+            } catch (SQLException ex) {
+                Logger.getLogger(CategoryDao.class.getName()).log(Level.SEVERE, null, ex);
+            }
+}
         return null;
     }
     
@@ -45,22 +53,28 @@ public class CategoryDao implements IMethod<Category> {
     public Category getOne(int id) {
         
         String query = "SELECT * FROM categories WHERE id = ?";
-        
+        ResultSet rs = null;
         try (Connection con = SQLServerConnection.getConnection();
                 PreparedStatement ps = con.prepareStatement(query)) {
-            ps.setInt(1, id);
-            
-            ResultSet rs = ps.executeQuery();
+            ps.setInt(1, id);     
+            rs = ps.executeQuery();
             if (rs.next()) {
-                Category p = Category.builder()
+                return Category.builder()
                         .id(rs.getInt(1))
                         .name(rs.getString(2))
                         .status(rs.getInt(3))
                         .build();
-                return p;
             }
+            
         } catch (SQLException ex) {
             ex.printStackTrace(System.out);
+        }
+        finally{
+            try {
+                rs.close();
+            } catch (SQLException ex) {
+                Logger.getLogger(CategoryDao.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
         return null;
     }

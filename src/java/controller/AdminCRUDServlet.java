@@ -33,6 +33,7 @@ public class AdminCRUDServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
+            
             int productID = Integer.parseInt(request.getParameter("id"));
             Product product = new ProductDao().getOne(productID);
             request.setAttribute("ProductID", productID);
@@ -75,7 +76,7 @@ public class AdminCRUDServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        PrintWriter out = response.getWriter();
+        
         int productID = Integer.parseInt(request.getParameter("ProductID"));
         String name = request.getParameter("Name");
         int brandID = Integer.parseInt(request.getParameter("BrandID"));

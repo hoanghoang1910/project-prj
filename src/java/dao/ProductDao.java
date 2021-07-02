@@ -7,6 +7,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import jdbc.SQLServerConnection;
 
 public class ProductDao implements IMethod<Product> {
@@ -15,12 +17,13 @@ public class ProductDao implements IMethod<Product> {
     public List<Product> getAll() {
 
         String query = "SELECT * FROM products";
+        ResultSet rs = null;
         List<Product> ls = new ArrayList<>();
 
         try (Connection con = SQLServerConnection.getConnection();
                 PreparedStatement ps = con.prepareStatement(query)) {
 
-            ResultSet rs = ps.executeQuery();
+            rs = ps.executeQuery();
             while (rs.next()) {
                 Product product = Product.builder()
                         .id(rs.getInt(1))
@@ -36,9 +39,17 @@ public class ProductDao implements IMethod<Product> {
                         .build();
                 ls.add(product);
             }
+            
             return ls;
         } catch (SQLException ex) {
             ex.printStackTrace(System.out);
+        }
+        finally{
+            try {
+                rs.close();
+            } catch (SQLException ex) {
+                Logger.getLogger(ProductDao.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
         return null;
     }
@@ -47,14 +58,14 @@ public class ProductDao implements IMethod<Product> {
     public Product getOne(int id) {
 
         String query = "SELECT * FROM products WHERE id = ?";
-
+        ResultSet rs = null;
         try (Connection con = SQLServerConnection.getConnection();
                 PreparedStatement ps = con.prepareStatement(query)) {
             ps.setInt(1, id);
 
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                Product product = Product.builder()
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                return Product.builder()
                         .id(rs.getInt(1))
                         .brandId(rs.getInt(2))
                         .categoryId(rs.getInt(3))
@@ -66,10 +77,17 @@ public class ProductDao implements IMethod<Product> {
                         .note(rs.getString(9))
                         .status(rs.getInt(10))
                         .build();
-                return product;
             }
+           
         } catch (SQLException ex) {
             ex.printStackTrace(System.out);
+        }
+        finally{
+            try {
+                rs.close();
+            } catch (SQLException ex) {
+                Logger.getLogger(ProductDao.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
         return null;
     }
@@ -152,16 +170,16 @@ public class ProductDao implements IMethod<Product> {
         return check > 0;
     }
 
-    public List<Product> searchByName(String text) {
+    public List<Product> searchByName(String text) throws SQLException {
 
         String query = "SELECT * FROM products WHERE name LIKE ?";
         List<Product> ls = new ArrayList<>();
-
+        ResultSet rs = null;
         try (Connection con = SQLServerConnection.getConnection();
                 PreparedStatement ps = con.prepareStatement(query)) {
             ps.setString(1, "%" + text + "%");
 
-            ResultSet rs = ps.executeQuery();
+            rs = ps.executeQuery();
             while (rs.next()) {
                 Product product = Product.builder()
                         .id(rs.getInt(1))
@@ -177,15 +195,19 @@ public class ProductDao implements IMethod<Product> {
                         .build();
                 ls.add(product);
             }
+           
             return ls;
         } catch (SQLException ex) {
             ex.printStackTrace(System.out);
         }
+        finally{
+             rs.close();
+        }
         return null;
     }
 
-    public List<Product> filterByBrand(int id) {
-
+    public List<Product> filterByBrand(int id) throws SQLException {
+        ResultSet rs = null;
         String query = "SELECT * FROM products WHERE brand_id = ?";
         List<Product> ls = new ArrayList<>();
 
@@ -193,7 +215,7 @@ public class ProductDao implements IMethod<Product> {
                 PreparedStatement ps = con.prepareStatement(query)) {
             ps.setInt(1, id);
 
-            ResultSet rs = ps.executeQuery();
+            rs = ps.executeQuery();
             while (rs.next()) {
                 Product product = Product.builder()
                         .id(rs.getInt(1))
@@ -209,23 +231,28 @@ public class ProductDao implements IMethod<Product> {
                         .build();
                 ls.add(product);
             }
+            
             return ls;
         } catch (SQLException ex) {
             ex.printStackTrace(System.out);
         }
+        finally{
+            rs.close();
+        }
         return null;
     }
 
-    public List<Product> filterByCategory(int id) {
+    public List<Product> filterByCategory(int id) throws SQLException {
 
         String query = "SELECT * FROM products WHERE category_id = ?";
         List<Product> ls = new ArrayList<>();
+        ResultSet rs = null;
 
         try (Connection con = SQLServerConnection.getConnection();
                 PreparedStatement ps = con.prepareStatement(query)) {
             ps.setInt(1, id);
 
-            ResultSet rs = ps.executeQuery();
+            rs = ps.executeQuery();
             while (rs.next()) {
                 Product product = Product.builder()
                         .id(rs.getInt(1))
@@ -241,9 +268,13 @@ public class ProductDao implements IMethod<Product> {
                         .build();
                 ls.add(product);
             }
+            
             return ls;
         } catch (SQLException ex) {
             ex.printStackTrace(System.out);
+        }
+        finally{
+            rs.close();
         }
         return null;
     }
@@ -292,8 +323,8 @@ public class ProductDao implements IMethod<Product> {
         }
     }
 
-    public List<Product> getAllPagging(int index) {
-
+    public List<Product> getAllPagging(int index) throws SQLException {
+        ResultSet rs = null;
         String query = "select * from products order by id \n"
                 + "OFFSET ? ROWS FETCH NEXT 8 ROWS ONLY ";
         List<Product> ls = new ArrayList<>();
@@ -301,7 +332,7 @@ public class ProductDao implements IMethod<Product> {
         try (Connection con = SQLServerConnection.getConnection();
                 PreparedStatement ps = con.prepareStatement(query)) {
             ps.setInt(1, (index - 1) * 8);
-            ResultSet rs = ps.executeQuery();
+            rs = ps.executeQuery();
             while (rs.next()) {
                 Product product = Product.builder()
                         .id(rs.getInt(1))
@@ -317,28 +348,33 @@ public class ProductDao implements IMethod<Product> {
                         .build();
                 ls.add(product);
             }
+            
             return ls;
         } catch (SQLException ex) {
             ex.printStackTrace(System.out);
-        }
+        }finally{rs.close();}
         return null;
     }
 
-    public int count() {
+    public int count() throws SQLException {
         String query = "select count(*) from products";
+        ResultSet rs = null;
         try (Connection con = SQLServerConnection.getConnection();
                 PreparedStatement ps = con.prepareStatement(query)) {
-            ResultSet rs = ps.executeQuery();
-            while(rs.next()){
+            rs = ps.executeQuery();
+            if(rs.next()){
                 return rs.getInt(1);
             }
+            
         } catch (SQLException ex) {
             ex.printStackTrace(System.out);
+        }finally{
+            rs.close();
         }
         return 0;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws SQLException {
 //        List<Product> ls = new ArrayList<>();
        
         ProductDao a = new ProductDao();

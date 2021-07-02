@@ -73,6 +73,8 @@ public class AdminAddServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         PrintWriter out = response.getWriter();
+        try{
+        
         int productID = Integer.parseInt(request.getParameter("ProductID"));
         String name = request.getParameter("Name");
         int brandID = Integer.parseInt(request.getParameter("BrandID"));
@@ -99,11 +101,12 @@ public class AdminAddServlet extends HttpServlet {
         boolean add = a.add(product);
         if (add) {
             response.sendRedirect("adminSuccess.jsp");
-        }
-        else{
+        } else {
             out.print("Add failed !");
         }
+        }catch(IOException | NumberFormatException e){System.out.println("error");}finally{out.close();}
     }
+
 
     /**
      * Returns a short description of the servlet.

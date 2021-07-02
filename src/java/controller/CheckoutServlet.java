@@ -10,9 +10,10 @@ import dao.OrderDetailDao;
 import entity.Cart;
 import entity.Order;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.sql.SQLException;
 import java.util.List;
-import javafx.print.Printer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -131,6 +132,8 @@ public class CheckoutServlet extends HttpServlet {
             }
         } catch (IOException ex) {
             response.sendRedirect("error.jsp");
+        } catch (SQLException ex) {
+            Logger.getLogger(CheckoutServlet.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

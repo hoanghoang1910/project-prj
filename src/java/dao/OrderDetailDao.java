@@ -11,7 +11,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import jdbc.SQLServerConnection;
@@ -42,13 +41,14 @@ public class OrderDetailDao {
         return false;
     }
 
-    public List<OrderDetail> getOrderDetail(int id) {
+    public List<OrderDetail> getOrderDetail(int id) throws SQLException {
         List<OrderDetail> list = new ArrayList<>();
         String query = "SELECT * FROM orders_detail where order_id = ?";
+        ResultSet rs = null;
         try (Connection con = SQLServerConnection.getConnection();
                 PreparedStatement ps = con.prepareStatement(query)) {
             ps.setInt(1, id);
-            ResultSet rs = ps.executeQuery();
+            rs = ps.executeQuery();
              
             while (rs.next()) {
                 OrderDetail a = OrderDetail.builder().
@@ -61,14 +61,18 @@ public class OrderDetailDao {
                         .build();
                 list.add(a);
             }
+            
             return list;
         } catch (SQLException ex) {
             ex.printStackTrace(System.out);
         }
+        finally{
+            rs.close();
+        }
         return null;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws SQLException {
         OrderDetailDao a = new OrderDetailDao();
         List<OrderDetail> list = a.getOrderDetail(6);
         for (OrderDetail orderDetail : list) {

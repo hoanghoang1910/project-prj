@@ -14,32 +14,36 @@ import jdbc.SQLServerConnection;
 
 public class AccountDao {
 
-    public Account login(String account, String password) {
+    public Account login(String account, String password) throws SQLException {
         
         String query = "SELECT * FROM accounts WHERE account = ? AND password = ?";
-
+        ResultSet rs = null;
         try (Connection con = SQLServerConnection.getConnection();
                 PreparedStatement ps = con.prepareStatement(query)) {
             ps.setString(1, account);
             ps.setString(2, password);
-            ResultSet rs = ps.executeQuery();
+            rs = ps.executeQuery();
             if (rs.next()) {
-                Account acc = Account.builder()
+                
+                return Account.builder()
                         .id(rs.getInt("id"))
                         .account(rs.getString("account"))
                         .password(rs.getString("password"))
                         .displayName(rs.getString("displayName"))
                         .roll(rs.getString("roll"))
                         .build();
-                return acc;
             }
         } catch (SQLException ex) {
             ex.printStackTrace(System.out);
         }
+        finally{
+            rs.close();    
+        }
         return null;
+        
     }
     
-    public static void main(String[] args) {      
+    public static void main(String[] args) throws SQLException {      
         AccountDao a = new AccountDao();
         Account acc = a.login("Nguyen Tran Hoang", "19102001");
         System.out.println(acc);

@@ -5,7 +5,6 @@
  */
 package dao;
 
-import entity.Brand;
 import entity.Image;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -18,16 +17,16 @@ import jdbc.SQLServerConnection;
 
 public class ImageDao {
 
-    public List<Image> getAllByProductId(int id) {
+    public List<Image> getAllByProductId(int id) throws SQLException {
         
         String query = "SELECT * FROM images WHERE product_id = ?";
         List<Image> ls = new ArrayList<>();
-
+        ResultSet rs = null;
         try (Connection con = SQLServerConnection.getConnection();
                 PreparedStatement ps = con.prepareStatement(query)) {
             ps.setInt(1, id);
             
-            ResultSet rs = ps.executeQuery();
+            rs = ps.executeQuery();
             while (rs.next()) {
                 Image image = Image.builder()
                         .id(rs.getInt(1))
@@ -36,9 +35,13 @@ public class ImageDao {
                         .build();
                 ls.add(image);
             }
+            rs.close();
             return ls;
         } catch (SQLException ex) {
             ex.printStackTrace(System.out);
+        }
+        finally{
+            rs.close();
         }
         return null;
     }    

@@ -12,7 +12,10 @@ import entity.Brand;
 import entity.Category;
 import entity.Product;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -33,7 +36,7 @@ public class ProductServlet extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws ServletException, IOException, SQLException {
         response.setContentType("text/html;charset=UTF-8");
         try {
                int count = new ProductDao().count();
@@ -41,7 +44,7 @@ public class ProductServlet extends HttpServlet {
             if(count % 8 != 0){
                 endPage++;
             }
-            String index =(request.getParameter("pageid"));
+            String index =request.getParameter("pageid");
             
             if(index == null){
                 index = "1";
@@ -56,6 +59,7 @@ public class ProductServlet extends HttpServlet {
             request.setAttribute("lsProduct", lsProduct);
             request.getRequestDispatcher("index.jsp").forward(request, response);
         } catch (IOException | ServletException ex) {
+            System.out.println("error");
         }
     }
 
@@ -71,7 +75,11 @@ public class ProductServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        try {
+            processRequest(request, response);
+        } catch (SQLException ex) {
+            Logger.getLogger(ProductServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
@@ -85,7 +93,11 @@ public class ProductServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        try {
+            processRequest(request, response);
+        } catch (SQLException ex) {
+            Logger.getLogger(ProductServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
